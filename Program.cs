@@ -14,7 +14,7 @@ namespace EventGridTest
       {
          m_Config = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
 
-         Console.WriteLine("Event Grid public to Topic Test...");
+         Console.WriteLine("Event Grid publish to Topic Test...");
 
          var egClient = new EventGridClient(new TopicCredentials(m_Config.GetSection("EventGridAccessKey").Value));
 
