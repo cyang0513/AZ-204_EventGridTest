@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.Azure.EventGrid;
-using Microsoft.Azure.EventGrid.Models;
+using Azure;
+using Azure.Messaging.EventGrid;
 using Microsoft.Extensions.Configuration;
 
 namespace EventGridTest
@@ -16,23 +16,17 @@ namespace EventGridTest
 
          Console.WriteLine("Event Grid publish to Topic Test...");
 
-         var egClient = new EventGridClient(new TopicCredentials(m_Config.GetSection("EventGridAccessKey").Value));
+         var endpoint = new Uri(m_Config.GetSection("EventGridTopicEndpoint").Value);
+         var gridClient = new EventGridPublisherClient(endpoint, 
+                                                       new AzureKeyCredential(m_Config.GetSection("EventGridAccessKey").Value));
 
-         var hostName = new Uri(m_Config.GetSection("EventGridTopicEndpoint").Value).Host;
-         await egClient.PublishEventsAsync(hostName, new List<EventGridEvent>()
-                                               {
-                                                  new EventGridEvent()
-                                                  {
-                                                     Id = Guid.NewGuid().ToString(),
-                                                     Data = new ChyaEvent()
+
+         await gridClient.SendEventAsync(new EventGridEvent("Test subject", "ChyaEvent", "1.0", 
+                                                            new ChyaEvent()
                                                             {
-                                                               Message = "Chya Event grid test! Also for logic app!"
-                                                            },
-                                                     Subject = "Test subject",
-                                                     EventType = "ChyaEvent",
-                                                     DataVersion = "1.0"
-                                                  }
-                                               });
+                                                           
+                                                               Message = "Chya Event grid test! Also for logic app to send teams message!"
+                                                            }, typeof(ChyaEvent)));
 
          Console.WriteLine("Event published.");
          Console.ReadKey();
